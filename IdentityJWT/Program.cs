@@ -1,7 +1,10 @@
 using IdentityJWT.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +20,26 @@ builder.Services.AddDbContext<AppIdentityDbContex>(options => options.UseSqlServ
 builder.Services.AddIdentity<AplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppIdentityDbContex>()
     .AddDefaultTokenProviders();
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+       .AddJwtBearer(options => {
+           options.SaveToken = true;
+           options.RequireHttpsMetadata = true;
+           options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+           {
+               ValidateIssuer = true,
+               ValidIssuer = "https://localhost:44312",
+               ValidateAudience = true,
+               ValidAudience = "https://localhost:44312",
+               IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("AspNetCoreEgitim"))
+
+           };
+       });
+
 
 var app = builder.Build();
 
